@@ -1,0 +1,9 @@
+{% extends "users/auth_base.html" %}
+{% block title %}Войти{% endblock %}
+{% block card_header %}
+  Войти на сайт
+{% endblock %}
+{% block card_body %}
+  {% include 'includes/form_error.html' %}
+  {% include 'users/includes/auth_form.html' with forgot_password=True %}
+{% endblock %}
