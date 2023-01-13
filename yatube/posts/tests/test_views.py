@@ -384,3 +384,20 @@ class FollowViewsTests(TestCase):
                 author=self.author
             ).exists()
         )
+
+    def test_self_following_forbidden(self):
+        """Пользователь не может подписываться на себя."""
+        follow_count = Follow.objects.count()
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': self.user}
+            )
+        )
+        self.assertEqual(Follow.objects.count(), follow_count)
+        self.assertFalse(
+            Follow.objects.filter(
+                user=self.user,
+                author=self.user
+            ).exists()
+        )

@@ -9,11 +9,10 @@ from posts.models import Follow, Group, Post, User
 from posts.forms import CommentForm, PostForm
 
 
-@cache_page(20, key_prefix='index_page')
+@cache_page(settings.CACHE_DURABILITY, key_prefix='index_page')
 def index(request):
     template = 'posts/index.html'
-    post_list = Post.objects.select_related(
-        'author').select_related('group').all()
+    post_list = Post.objects.select_related('author', 'group').all()
     paginator = Paginator(post_list, settings.POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -26,8 +25,7 @@ def index(request):
 def group_posts(request, slug):
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
-    post_list = group.posts.select_related(
-        'author').select_related('group').all()
+    post_list = group.posts.select_related('author', 'group').all()
     paginator = Paginator(post_list, settings.POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -41,8 +39,7 @@ def group_posts(request, slug):
 def profile(request, username):
     template = 'posts/profile.html'
     user_obj = get_object_or_404(User, username=username)
-    post_list = user_obj.posts.select_related(
-        'author').select_related('group').all()
+    post_list = user_obj.posts.select_related('author', 'group').all()
     paginator = Paginator(post_list, settings.POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -63,8 +60,7 @@ def post_detail(request, post_id):
     template = 'posts/post_detail.html'
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm()
-    comments = post.comments.select_related(
-        'author').select_related('post').all()
+    comments = post.comments.select_related('author', 'post').all()
     posts_count = post.author.posts.all().count()
     context = {
         'posts_count': posts_count,
@@ -136,9 +132,9 @@ def add_comment(request, post_id):
 @login_required
 def follow_index(request):
     template = 'posts/follow.html'
-    authors = request.user.follower.values_list('author', flat=True)
-    post_list = Post.objects.filter(author__in=authors).select_related(
-        'author').select_related('group')
+    post_list = Post.objects.filter(
+        author__following__user=request.user
+        ).select_related('author', 'group')
     paginator = Paginator(post_list, settings.POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -151,22 +147,18 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    try:
-        Follow.objects.create(
+    if request.user != author:
+        Follow.objects.get_or_create(
             user=request.user,
             author=author
         )
-    except IntegrityError:
-        pass
     return redirect('posts:profile', username)
 
 
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    try:
+    if Follow.objects.filter(user=request.user, author=author).exists():
         follow = Follow.objects.get(user=request.user, author=author)
         follow.delete()
-    except Follow.DoesNotExist:
-        pass
     return redirect('posts:profile', username)

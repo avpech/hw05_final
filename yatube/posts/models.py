@@ -114,7 +114,7 @@ class Follow(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=('user', 'author'),
                 name='user_author_unique'
@@ -122,11 +122,13 @@ class Follow(models.Model):
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),
                 name='user_author_different'),
-        ]
+        )
         index_together = ('user', 'author')
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
 
     def __str__(self) -> str:
         return (
-            'relation: ' + self.user.get_username()
-            + ' - ' + self.author.get_username()
+            f'relation: {self.user.get_username()} '
+            f'- {self.author.get_username()}'
         )
