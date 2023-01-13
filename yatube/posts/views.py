@@ -133,7 +133,7 @@ def follow_index(request):
     template = 'posts/follow.html'
     post_list = Post.objects.filter(
         author__following__user=request.user
-        ).select_related('author', 'group')
+    ).select_related('author', 'group')
     paginator = Paginator(post_list, settings.POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
