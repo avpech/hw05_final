@@ -12,22 +12,22 @@
         </li>
         {% if post.group %}
           <li class="list-group-item">
-              <p>Группа: {{ post.group }}</p>
-              <a href="{% url 'posts:group_list' post.group.slug %}">
-                все записи группы
-              </a>
+            <p>Группа: {{ post.group }}</p>
+            <a href="{% url 'posts:group_list' post.group.slug %}">
+              все записи группы
+            </a>
           </li>
         {% endif %}
         <li class="list-group-item">
           Автор: {{ post.author.get_full_name }}
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            Всего постов автора:  <span >{{ posts_count }}</span>
+          Всего постов автора:  <span >{{ posts_count }}</span>
         </li>
         <li class="list-group-item">
-            <a href="{% url 'posts:profile' post.author.username %}">
-              все посты пользователя
-            </a>
+          <a href="{% url 'posts:profile' post.author.username %}">
+            все посты пользователя
+          </a>
         </li>
       </ul>
     </aside>
@@ -37,9 +37,9 @@
       {% endthumbnail %}
       <p>{{ post.text }}</p>
       {% if user == post.author %}
-      <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
-        редактировать запись
-      </a>
+        <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
+          редактировать запись
+        </a>
       {% endif %}
       {% include 'posts/includes/comments.html' %}
     </article>
